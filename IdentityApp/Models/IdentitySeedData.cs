@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace IdentityApp.Models
 {
@@ -14,6 +15,21 @@ namespace IdentityApp.Models
             if (context.Database.GetAppliedMigrations().Any())
             {
                 context.Database.Migrate();
+            }
+            var userManager = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+            var user = await userManager.FindByNameAsync(adminUser);
+
+            if (user == null) 
+            {
+                user = new IdentityUser
+                {
+                    UserName = adminUser,
+                    Email = "admin@mehmetnail.com",
+                    PhoneNumber = "6971234567"
+                };
+
+                await userManager.CreateAsync(user, adminPassword);
             }
         }
     }
