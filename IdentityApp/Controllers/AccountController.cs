@@ -1,8 +1,8 @@
 ﻿using IdentityApp.Models;
 using IdentityApp.ViewModels;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace IdentityApp.Controllers
 {
@@ -15,9 +15,9 @@ namespace IdentityApp.Controllers
 
         public AccountController(
            UserManager<AppUser> userManager,
-           RoleManager<AppRole> roleManager,
-           SignInManager<AppUser> signInManager,
-           IEmailSender emailSender)
+            RoleManager<AppRole> roleManager,
+            SignInManager<AppUser> signInManager,
+            IEmailSender emailSender)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -137,6 +137,86 @@ namespace IdentityApp.Controllers
 
             TempData["message"] = "Kullanıcı bulunamadı";
             return View();
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login");
+        }
+
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(string Email)
+        {
+            if (string.IsNullOrEmpty(Email))
+            {
+                TempData["message"] = "Enter your E-Mail Address.";
+                return View();
+            }
+
+            var user = await _userManager.FindByEmailAsync(Email);
+
+            if (user == null)
+            {
+                TempData["message"] = "Does not matching E-Mail addresses.";
+                return View();
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var url = Url.Action("ResetPassword", "Account", new { user.Id, token });
+
+            await _emailSender.SendEmailAsync(Email, "Resetting Password", $"Click on the link to renew your password.<a href='http://localhost:7045{url}'></a>.");
+         
+
+            TempData["message"] = "You can reset your password with the link sent to your e-mail address.";
+
+            return View();
+
+        }
+
+        public IActionResult ResetPassword(string Id, string token)
+        {
+            if (Id == null || token == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var model = new ResetPasswordModel { Token = token };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    TempData["message"] = "Does not exist any E-Mail addresses with matching this E-Mail.";
+                    return RedirectToAction("Login");
+                }
+                var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+
+                if (result.Succeeded)
+                {
+                    TempData["message"] = "Your Password Changed";
+                    return RedirectToAction("Login");
+                }
+
+                foreach (IdentityError err in result.Errors)
+                {
+                    ModelState.AddModelError("", err.Description);
+                }
+            }
+            return View(model);
         }
 
     }
