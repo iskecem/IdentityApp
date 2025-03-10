@@ -19,7 +19,6 @@ namespace IdentityApp.Controllers
             _roleManager = roleManager;
         }
 
-
         public IActionResult Index()
         {
             return View(_userManager.Users);

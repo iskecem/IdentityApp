@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace IdentityApp.Controllers
 {
 
-    [Authorize]
+    
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -16,6 +16,8 @@ namespace IdentityApp.Controllers
             _logger = logger;
         }
 
+        //[HttpGet("public-endpoint")]
+        //[AllowAnonymous]
         public IActionResult Index()
         {
             return View();

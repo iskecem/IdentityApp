@@ -1,5 +1,6 @@
 ﻿using IdentityApp.Models;
 using IdentityApp.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -75,12 +76,12 @@ namespace IdentityApp.Controllers
             return View(model);
         }
 
-
+        
         public IActionResult Create()
         {
             return View();
         }
-
+             
         [HttpPost]
         public async Task<IActionResult> Create(CreateViewModel model)
         {

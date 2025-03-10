@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IdentityApp.Controllers
 {
-    //[Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin")]
     public class RolesController : Controller
     {
         private readonly RoleManager<AppRole> _roleManager;
